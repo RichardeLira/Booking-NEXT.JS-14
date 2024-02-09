@@ -4,11 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-
 import { z } from 'zod'
-
 import { Button } from '@/components/ui/button'
-
+import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import {
   Form,
@@ -19,14 +17,13 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { BedDoubleIcon, CalendarIcon } from 'lucide-react'
-
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { addDays, format } from 'date-fns'
+import { format } from 'date-fns'
 
 export const formSchema = z.object({
   location: z.string().min(2).max(50),
@@ -96,7 +93,7 @@ export default function SearchForm() {
             control={form.control}
             name="dates"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem className="flex flex-col w-full">
                 <FormLabel className="text-white">dates</FormLabel>
                 <FormMessage />
                 <Popover>
@@ -107,7 +104,7 @@ export default function SearchForm() {
                         name="dates"
                         variant={'outline'}
                         className={cn(
-                          'w-[300px] justify-start text-left font-normal',
+                          'w-full lg:w-[300px] justify-start text-left font-normal',
                           !field.value.from && 'text-muted-foreground',
                         )}
                       >
@@ -122,15 +119,84 @@ export default function SearchForm() {
                             format(field.value?.from, 'LLL dd, y')
                           )
                         ) : (
-                          <span>Pick a date</span>
+                          <span>Select your date</span>
                         )}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      selected={field.value}
+                      defaultMonth={field.value.from}
+                      onSelect={field.onChange}
+                      numberOfMonths={2}
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                    />
+                  </PopoverContent>
                 </Popover>
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="flex w-full items-center space-x-2">
+          <div className="grid items-center flex-1">
+            <FormField
+              control={form.control}
+              name="adults"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-white">Adults</FormLabel>
+                  <FormMessage />
+                  <FormControl>
+                    <Input type="number" placeholder="Adults" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid items-center flex-1">
+            <FormField
+              control={form.control}
+              name="children"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-white">Children</FormLabel>
+                  <FormMessage />
+                  <FormControl>
+                    <Input type="number" placeholder="Adults" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid items-center flex-1  ">
+            <FormField
+              control={form.control}
+              name="rooms"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-white">Rooms</FormLabel>
+                  <FormMessage />
+                  <FormControl>
+                    <Input type="number" placeholder="Adults" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="mt-auto">
+            <Button type="submit" className="bg-blue-500 text-base">
+              Search
+            </Button>
+          </div>
         </div>
       </form>
     </Form>
