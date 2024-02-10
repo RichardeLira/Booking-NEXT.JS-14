@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -26,10 +26,10 @@ import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 
 export const formSchema = z.object({
-  location: z.string().min(2).max(50),
+  location: z.string().min(2, { message: 'Choice a place' }).max(50),
   dates: z.object({
-    from: z.date(),
-    to: z.date(),
+    from: z.date({ required_error: 'Please select a check-in date' }),
+    to: z.date({ required_error: 'Please select a check-out date' }),
   }),
   adults: z
     .string()
@@ -40,7 +40,7 @@ export const formSchema = z.object({
 })
 
 export default function SearchForm() {
-  // const router = useRouter()
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,7 +57,28 @@ export default function SearchForm() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    return values
+    console.log(values)
+
+    const checkinMonthday = values.dates.from.getDate().toString()
+    const checkinMonth = (values.dates.from.getMonth() + 1).toString()
+    const checkinYear = values.dates.from.getFullYear().toString()
+    const checkoutMonthday = values.dates.to.getDate().toString()
+    const checkoutMonth = (values.dates.to.getMonth() + 1).toString()
+    const checkoutYear = values.dates.to.getFullYear().toString()
+
+    const checkin = `${checkinYear}-${checkinMonth}-${checkinMonthday}`
+    const checkout = `${checkoutYear}-${checkoutMonth}-${checkoutMonthday}`
+
+    const url = new URL('https://www.booking.com/searchresults.html')
+
+    url.searchParams.set('ss', values.location)
+    url.searchParams.set('group_adults', values.adults)
+    url.searchParams.set('group_children', values.children)
+    url.searchParams.set('no_rooms', values.rooms)
+    url.searchParams.set('checkin', checkin)
+    url.searchParams.set('checkout', checkout)
+
+    router.push(`/search?url=${url.href}`)
   }
 
   return (
